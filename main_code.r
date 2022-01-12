@@ -1,7 +1,7 @@
 
 
 ################################################################################################################
-#################### This is modified from https://github.com/PoisonAlien/maftools/blob/master/R/tcgacompare.R plot
+#################### This Code is modified from https://github.com/PoisonAlien/maftools/blob/master/R/tcgacompare.R plot
 ################### Modifications are done, becuase of the different input type..... 
 #############################################################################################################
 
