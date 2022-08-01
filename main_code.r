@@ -9,7 +9,7 @@
 #We downloaded the ID9/mb data from cosmic3   ### https://cancer.sanger.ac.uk/signatures/documents/568/v3.2_ID9_TISSUE_yYzLQXR.txt
 #https://cancer.sanger.ac.uk/signatures/id/id9/
 
-ID9 <- read.csv("Example.csv")  ## Read data
+ID9 <- read.csv("mutation_load_comparison_plot/example.csv", sep = '\t')  ## Read data
 
 colnames(ID9) <- c("Cancer.Types","ID9mb")
 cancers <- unique(ID9$Cancer.Types)
@@ -28,10 +28,10 @@ tt <- as.data.frame(table(ID9[1]))  ##Number of samples for each cancer types
 
 #library(plyr)
 #tt <- count(ID9$Cancer.Types)
-tt<- tt[match(cancers, tt$Var1),]
+tt<- tt[match(cancers, tt$Cancer.Types),]
 
-tcga.cohort.med = merge(tt,median, by.x = 'Var1', by.y = 'Cancer.Types')
-tcga.cohort.med <- tcga.cohort.med[match(cancers, tcga.cohort.med$Var1),]
+tcga.cohort.med = merge(tt,median, by.x = 'Cancer.Types', by.y = 'Cancer.Types')
+tcga.cohort.med <- tcga.cohort.med[match(cancers, tcga.cohort.med$Cancer.Types),]
 
 #Median mutations
 colnames(tcga.cohort.med) = c('Cohort', 'Cohort_Size', 'Median_Mutations')
@@ -49,16 +49,16 @@ plot.dat = lapply(seq_len(length(tcga.cohort)), function(i){
                              x[order(x$ID9mb, decreasing = TRUE), 'ID9mb'  ],
                              x[,'Cancer.Types']
                              )
-  x
+  #colnames(x) <- c("V1","Cancer.Types","ID9mb")
 })
 names(plot.dat) = names(tcga.cohort)
  
 logscale = TRUE
 
 if(logscale){
-  y_lims = range(log10(data.table::rbindlist(l = plot.dat)[ID9mb != 0][,ID9mb]))
+  y_lims = range(log10(data.table::rbindlist(l = plot.dat)[V2 != 0][,V2]))
 }else{
-  y_lims = range(data.table::rbindlist(l = plot.dat)[,ID9mb])
+  y_lims = range(data.table::rbindlist(l = plot.dat)[,V2])
 }
 
 #####################
@@ -90,18 +90,18 @@ abline(h = pretty(y_lims), lty = 2, col = "gray70")
  
 lapply(seq_len(length(plot.dat)), function(i){
   x = plot.dat[[i]]
-  if(x[1, 'Cancer.Types'] == "CSCC-Met"){
+  if(x[1, 'V3'] == "Bladder-TCC"){   ###Cancer type you want to highlight
     if(logscale){
-      points(x$V1, log10(x$ID9mb), pch = 16, cex = 0.4, col = col[2])
+      points(x$V1, log10(x$V2), pch = 16, cex = 0.4, col = col[2])
     }else{
-      points(x$V1, x$ID9mb, pch = 16, cex = 0.4, col = col[2])
+      points(x$V1, x$V2, pch = 16, cex = 0.4, col = col[2])
     }
   }else{
     if(logscale){
-      points(x$V1, log10(x$ID9mb), pch = 16, cex = 0.4, col = col[1])
-      print("Haan log hai")
+      points(x$V1, log10(x$V2), pch = 16, cex = 0.4, col = col[1])
+      #print("Haan log haiga va")
     }else{
-      points(x$V1, x$ID9mb, pch = 16, cex = 0.4, col = col[1])
+      points(x$V1, x$V2, pch = 16, cex = 0.4, col = col[1])
     }
   }
 })
@@ -120,7 +120,7 @@ linePos = 2
 
 
 if(logscale){
-axis(side = 2, at = y_at, las = 2, line = -0.6, tick = FALSE,labels = 10^(y_at), cex.axis = axisFontSize)
+axis(side = 2, at = y_at, las = 2, line = -0.6, tick = FALSE, labels = round(10^(y_at),5), cex.axis = axisFontSize)
 mtext(text = "ID9-mutations-per-mb", side = sidePos, line = linePos)
 }else{
 
@@ -141,3 +141,4 @@ if(logscale){
              y1 = tcga.cohort.med[i, 'Median_Mutations'], col = medianCol)
   })
 }
+
